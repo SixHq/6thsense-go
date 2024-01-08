@@ -1,0 +1,3 @@
+package sixthGo
+
+import "log"
