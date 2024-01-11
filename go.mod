@@ -1,4 +1,4 @@
-module github.com/SixHq/6thsense-go-package
+module github.com/SixHq/6thsense-go
 
 go 1.21.5
 
