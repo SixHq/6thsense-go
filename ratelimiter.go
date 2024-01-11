@@ -7,23 +7,12 @@ import (
 	"io/ioutil"
 	"net/http"
 	"strings"
-	"time"
 )
-
-func getDate() map[string]int {
-	now := time.Now()
-
-	return map[string]int{
-		"seconds": int(now.Unix()),
-	}
-}
 
 type MyResponse struct {
 	Response bool `json:"response"`
 	// Add other fields based on your actual JSON structure
 }
-
-
 
 func rateLimiteMiddleware(apikey string, config Config, endpoints []string, log_dict map[string]interface{}, app http.HandlerFunc) http.HandlerFunc {
 
@@ -41,7 +30,7 @@ func rateLimiteMiddleware(apikey string, config Config, endpoints []string, log_
 			"is_active":  true,
 		}
 
-		jsonBody, err := json.Marshal(body)
+		jsonBody, _ := json.Marshal(body)
 
 		// Assuming you have a function similar to axios.post for making HTTP POST requests
 		response, err := http.Post("https://backend.withsix.co/rate-limit/enquire-has-reached-rate_limit", "application/json", bytes.NewBuffer(jsonBody))
@@ -68,11 +57,22 @@ func rateLimiteMiddleware(apikey string, config Config, endpoints []string, log_
 		return false, nil
 	}
 
-	sendlogs := func(apiKey string, logDict map[string]interface, route string, header map[string]string, body interface{}, query map[string]string) error {
+	sendlogs := func(apiKey string, logDict map[string]interface{}, route string, header map[string][]string, body interface{}, query map[string][]string) error {
 		timestamp := getTimeNow()
-		lastLogSent, exists := logDict[route]
+		lastLogSentRaw, exists := logDict[route]
 
-		if !exists || timestamp-lastLogSent > 10000 {
+		// Check if the key exists in the map
+		if !exists {
+			lastLogSentRaw = nil
+		}
+
+		// Convert lastLogSent to int64
+		var lastLogSent int
+		if lastLogSentRaw != nil {
+			lastLogSent, _ = lastLogSentRaw.(int)
+		}
+
+		if lastLogSent == 0 || timestamp-lastLogSent > 10000 {
 			payload := map[string]interface{}{
 				"header":          header,
 				"user_id":         apiKey,
@@ -142,9 +142,11 @@ func rateLimiteMiddleware(apikey string, config Config, endpoints []string, log_
 				response, err := http.Get("https://backend.withsix.co/project-config/config/get-route-rate-limit/" + apikey + "/" + route)
 				if err == nil && response.StatusCode == http.StatusOK {
 					statusCode = response.StatusCode
-					if lastTimeUpdated,ok:=config.RateLimiter[route]; ok{
-						lastTimeUpdated.LastUpdated=updatedTime
-						config.RateLimiter[route]=lastTimeUpdated
+					if lastTimeUpdated, ok := config.RateLimiter[route]; ok {
+						lastTimeUpdated.LastUpdated = updatedTime
+						config.RateLimiter[route] = lastTimeUpdated
+					} else {
+						app(w, req)
 					}
 
 					if statusCode == http.StatusOK {
@@ -152,18 +154,18 @@ func rateLimiteMiddleware(apikey string, config Config, endpoints []string, log_
 							decoder := json.NewDecoder(response.Body)
 							var rateLimitResponse RateLimiter
 							if err := decoder.Decode(&rateLimitResponse); err == nil {
-								
+
 								config.RateLimiter[route] = rateLimitResponse
 								preferredID := getPreferredID(req, rateLimitResponse)
-								result,err := isRateLimitReached(config, preferredID, route)
+								result, err := isRateLimitReached(config, preferredID, route)
 								if err != nil {
 									fmt.Println("Error marshaling JSON:", err)
-									app(w,req)
+									app(w, req)
 								}
 
 								if result {
-									newQuery:=make(map[string]interface{})
-									sendlogs(apikey, log_dict, route, req.Header, body, newQuery)
+
+									sendlogs(apikey, log_dict, route, req.Header, body, req.URL.Query())
 									tempPayload := rateLimitResponse.ErrorPayload
 									final := make(map[string]interface{})
 
@@ -183,12 +185,20 @@ func rateLimiteMiddleware(apikey string, config Config, endpoints []string, log_
 									for key, value := range newHeader {
 										w.Header().Set(key, value)
 									}
-									w.WriteHeader(http.StatusEnhanceYourCalm)
+									w.WriteHeader(http.StatusBadRequest)
 									w.Write(stringed)
+
+								} else {
 									app(w, req)
 								}
+							} else {
+								app(w, req)
 							}
+						} else {
+							app(w, req)
 						}
+					} else {
+						app(w, req)
 					}
 				}
 			}

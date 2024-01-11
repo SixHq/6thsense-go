@@ -8,20 +8,19 @@ type Encryption struct {
 	UseCount    int    `json:"use_count"`
 }
 
+type ErrorPayload map[string]interface{}
+
 type RateLimiter struct {
-	ID             string `json:"id"`
-	Route          string `json:"route"`
-	Interval       int    `json:"interval"`
-	RateLimit      int    `json:"rate_limit"`
-	LastUpdated    int    `json:"last_updated"`
-	IsActive       bool   `json:"is_active"`
-	UniqueID       string `json:"unique_id"`
-	ErrorPayloadID string `json:"error_payload_id"`
-	ErrorPayload   map[string]struct {
-		Message string `json:"message"`
-		UID     string `json:"uid"`
-	} `json:"error_payload"`
-	RateLimitType string `json:"rate_limit_type"`
+	ID             string                  `json:"id"`
+	Route          string                  `json:"route"`
+	Interval       int                     `json:"interval"`
+	RateLimit      int                     `json:"rate_limit"`
+	LastUpdated    int                     `json:"last_updated"`
+	IsActive       bool                    `json:"is_active"`
+	UniqueID       string                  `json:"unique_id"`
+	ErrorPayloadID string                  `json:"error_payload_id"`
+	ErrorPayload   map[string]ErrorPayload `json:"error_payload"`
+	RateLimitType  string                  `json:"rate_limit_type"`
 }
 
 type Config struct {
