@@ -19,9 +19,10 @@ route string,*/
 
 var config Config
 var log_dict map[string]interface{}
+var base_url string = "https://backend.withsix.co"
 
 func Initialize(endpoints []string, apikey string, app http.HandlerFunc) {
-	var base_url string = "https://backend.withsix.co"
+
 	url := base_url + "/project-config/config/" + apikey
 	response, err := http.Get(url)
 	// Check for errors
@@ -99,7 +100,7 @@ func SyncProjectRoutes(endpoints []string) (result map[string]interface{}, err e
 		"rate_limiter_enabled": config.UserId != "" && config.RateLimiterEnabled,
 	}
 
-	syncurl := config.BaseURL + "/project-config/config/sync-user-config"
+	syncurl := base_url + "/project-config/config/sync-user-config"
 	jsonBody, err := json.Marshal(newConfig)
 	if err != nil {
 		fmt.Println("Error marshaling JSON:", err)
