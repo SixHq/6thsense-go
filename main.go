@@ -17,17 +17,12 @@ status string,
 learn_more_link string,
 route string,*/
 
-type Sixth struct {
-	apikey      string
-	base_url    string
-	config      Config
-	config_resp Config
-	log_dict    map[string]interface{}
-	app         http.HandlerFunc
-}
+var config Config
+var log_dict map[string]interface{}
 
-func (sixth *Sixth) Initialize(endpoints []string) {
-	url := sixth.base_url + "/project-config/config/" + sixth.apikey
+func Initialize(endpoints []string, apikey string, app http.HandlerFunc) {
+	var base_url string = "https://backend.withsix.co"
+	url := base_url + "/project-config/config/" + apikey
 	response, err := http.Get(url)
 	// Check for errors
 	if err != nil {
@@ -43,23 +38,23 @@ func (sixth *Sixth) Initialize(endpoints []string) {
 		return
 	}
 
-	err = json.Unmarshal(body, &sixth.config)
+	err = json.Unmarshal(body, &config)
 	if err != nil {
 		fmt.Println("Error:", err)
 		return
 	}
 
-	if sixth.config.RateLimiterEnabled {
-		rateLimiteMiddleware(sixth.apikey, sixth.config, endpoints, sixth.log_dict, sixth.app)
+	if config.RateLimiterEnabled {
+		rateLimiteMiddleware(apikey, config, endpoints, log_dict, app)
 	}
 }
 
-func (config *Config) SyncProjectRoutes(endpoints []string) (result map[string]interface{}, err error) {
+func SyncProjectRoutes(endpoints []string) (result map[string]interface{}, err error) {
 	var rlConfigs = make(map[string]interface{})
 
 	for _, route := range endpoints {
 		editedRoute := strings.ReplaceAll(route, "/", "~")
-		if config != nil {
+		if config.BaseURL != "" && config.UserId != "" {
 			if _, exists := config.RateLimiter[editedRoute]; exists {
 				rlConfigs[editedRoute] = config.RateLimiter[editedRoute]
 			} else {
@@ -100,8 +95,8 @@ func (config *Config) SyncProjectRoutes(endpoints []string) (result map[string]i
 		"base_url":             '_',
 		"last_updated":         unixMillis,
 		"created_at":           unixMillis,
-		"encryption_enabled":   config != nil && config.EncryptionEnabled,
-		"rate_limiter_enabled": config != nil && config.RateLimiterEnabled,
+		"encryption_enabled":   config.UserId != "" && config.EncryptionEnabled,
+		"rate_limiter_enabled": config.UserId != "" && config.RateLimiterEnabled,
 	}
 
 	syncurl := config.BaseURL + "/project-config/config/sync-user-config"
@@ -123,15 +118,11 @@ func (config *Config) SyncProjectRoutes(endpoints []string) (result map[string]i
 
 }
 
-func (sixth *Sixth) SyncProject(endpoints []string, log_dict map[string]interface{}) {
-	sixth.config.SyncProjectRoutes(endpoints)
+func SyncProject(endpoints []string) {
+	SyncProjectRoutes(endpoints)
 
 	for _, route := range endpoints {
 		editedRoute := strings.ReplaceAll(route, "/", "~")
 		log_dict[editedRoute] = nil
 	}
-}
-
-func main() {
-
 }
