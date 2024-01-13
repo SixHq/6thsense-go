@@ -14,7 +14,7 @@ type MyResponse struct {
 	// Add other fields based on your actual JSON structure
 }
 
-func rateLimiteMiddleware(apikey string, config Config, endpoints []string, log_dict map[string]interface{}, app http.HandlerFunc) http.HandlerFunc {
+func rateLimiteMiddleware(apikey string, config Config, endpoints []string, log_dict map[string]interface{}, next http.Handler) http.Handler {
 
 	isRateLimitReached := func(config Config, uid, route string) (bool, error) {
 
@@ -127,7 +127,7 @@ func rateLimiteMiddleware(apikey string, config Config, endpoints []string, log_
 		return preferredID
 	}
 
-	return func(w http.ResponseWriter, req *http.Request) {
+	return http.HandlerFunc(func(w http.ResponseWriter, req *http.Request) {
 		// Middleware logic
 		//host := req.Header.Get("Host")
 		statusCode := 200
@@ -146,7 +146,7 @@ func rateLimiteMiddleware(apikey string, config Config, endpoints []string, log_
 						lastTimeUpdated.LastUpdated = updatedTime
 						config.RateLimiter[route] = lastTimeUpdated
 					} else {
-						app(w, req)
+						next.ServeHTTP(w, req)
 					}
 
 					if statusCode == http.StatusOK {
@@ -160,7 +160,7 @@ func rateLimiteMiddleware(apikey string, config Config, endpoints []string, log_
 								result, err := isRateLimitReached(config, preferredID, route)
 								if err != nil {
 									fmt.Println("Error marshaling JSON:", err)
-									app(w, req)
+									next.ServeHTTP(w, req)
 								}
 
 								if result {
@@ -189,23 +189,22 @@ func rateLimiteMiddleware(apikey string, config Config, endpoints []string, log_
 									w.Write(stringed)
 
 								} else {
-									app(w, req)
+									next.ServeHTTP(w, req)
 								}
 							} else {
-								app(w, req)
+								next.ServeHTTP(w, req)
 							}
 						} else {
-							app(w, req)
+							next.ServeHTTP(w, req)
 						}
 					} else {
-						app(w, req)
+						next.ServeHTTP(w, req)
 					}
 				}
 			}
-			app(w, req)
+			next.ServeHTTP(w, req)
 		}
 
-		// Execute middleware logic
 		tryMiddlewareLogic()
-	}
+	})
 }
