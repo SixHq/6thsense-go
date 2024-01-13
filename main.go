@@ -54,7 +54,7 @@ func Initialize(endpoints []string, apikey string) {
 	}*/
 }
 
-func applyMiddleWares(next http.Handler) http.Handler {
+func ApplyMiddleWares(next http.Handler) http.Handler {
 	if config.RateLimiterEnabled {
 		return rateLimiteMiddleware(apiKey, config, endpointss, log_dict, next)
 	} else {
