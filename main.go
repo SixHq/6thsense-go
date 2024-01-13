@@ -20,9 +20,13 @@ route string,*/
 var config Config
 var log_dict map[string]interface{}
 var base_url string = "https://backend.withsix.co"
+var apiKey string
+var endpointss []string
 
-func Initialize(endpoints []string, apikey string, app http.HandlerFunc) {
+func Initialize(endpoints []string, apikey string) {
 
+	apiKey = apikey
+	endpointss = endpoints
 	url := base_url + "/project-config/config/" + apikey
 	response, err := http.Get(url)
 	// Check for errors
@@ -45,8 +49,16 @@ func Initialize(endpoints []string, apikey string, app http.HandlerFunc) {
 		return
 	}
 
-	if config.RateLimiterEnabled {
+	/*if config.RateLimiterEnabled {
 		rateLimiteMiddleware(apikey, config, endpoints, log_dict, app)
+	}*/
+}
+
+func applyMiddleWares(next http.Handler) http.Handler {
+	if config.RateLimiterEnabled {
+		return rateLimiteMiddleware(apiKey, config, endpointss, log_dict, next)
+	} else {
+		return next
 	}
 }
 
