@@ -16,6 +16,7 @@ attack_type string,
 status string,
 learn_more_link string,
 route string,*/
+//comment above temporary
 
 var config Config
 var log_dict map[string]interface{}
