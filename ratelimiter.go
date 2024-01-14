@@ -128,6 +128,7 @@ func rateLimiteMiddleware(apikey string, config Config, endpoints []string, log_
 	}
 
 	return http.HandlerFunc(func(w http.ResponseWriter, req *http.Request) {
+		fmt.Println("kilode3")
 		// Middleware logic
 		//host := req.Header.Get("Host")
 		statusCode := 200
@@ -150,6 +151,7 @@ func rateLimiteMiddleware(apikey string, config Config, endpoints []string, log_
 					}
 
 					if statusCode == http.StatusOK {
+						fmt.Println("kilode2")
 						if response.Header.Get("Content-Type") == "application/json" {
 							decoder := json.NewDecoder(response.Body)
 							var rateLimitResponse RateLimiter
@@ -164,7 +166,7 @@ func rateLimiteMiddleware(apikey string, config Config, endpoints []string, log_
 								}
 
 								if result {
-
+									fmt.Println("kilode1")
 									sendlogs(apikey, log_dict, route, req.Header, body, req.URL.Query())
 									tempPayload := rateLimitResponse.ErrorPayload
 									final := make(map[string]interface{})
