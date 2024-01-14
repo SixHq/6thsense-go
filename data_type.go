@@ -1,11 +1,11 @@
 package sixthGo
 
 type Encryption struct {
-	CreatedAt   int    `json:"created_at"`
-	LastUpdated int    `json:"last_updated"`
-	PrivateKey  string `json:"private_key"`
-	PublicKey   string `json:"public_key"`
-	UseCount    int    `json:"use_count"`
+	CreatedAt   float64 `json:"created_at"`
+	LastUpdated float64 `json:"last_updated"`
+	PrivateKey  string  `json:"private_key"`
+	PublicKey   string  `json:"public_key"`
+	UseCount    int     `json:"use_count"`
 }
 
 type ErrorPayload map[string]interface{}
