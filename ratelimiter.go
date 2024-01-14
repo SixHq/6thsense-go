@@ -101,6 +101,9 @@ func rateLimiteMiddleware(apikey string, config Config, endpoints []string, log_
 
 			// Handle the response as needed
 			// ...
+			if logDict[route] == nil {
+				logDict = make(map[string]interface{})
+			}
 
 			logDict[route] = timestamp
 		}
