@@ -136,6 +136,7 @@ func SyncProject(endpoints []string) {
 	SyncProjectRoutes(endpoints)
 
 	for _, route := range endpoints {
+		fmt.Println(route)
 		editedRoute := strings.ReplaceAll(route, "/", "~")
 		log_dict[editedRoute] = 0.0
 	}
