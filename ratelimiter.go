@@ -142,6 +142,11 @@ func rateLimiteMiddleware(apikey string, config Config, endpoints []string, log_
 			if updatedTime-config.RateLimiter[route].LastUpdated > 60000 {
 				response, err := http.Get("https://backend.withsix.co/project-config/config/get-route-rate-limit/" + apikey + "/" + route)
 				fmt.Println(response.StatusCode, "kilode4", http.StatusOK)
+
+				if err != nil {
+					fmt.Println("error re oh", err)
+				}
+
 				if err == nil && response.StatusCode == http.StatusOK {
 					statusCode = response.StatusCode
 					if lastTimeUpdated, ok := config.RateLimiter[route]; ok {
