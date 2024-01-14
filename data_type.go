@@ -13,7 +13,7 @@ type ErrorPayload map[string]interface{}
 type RateLimiter struct {
 	ID             string                  `json:"id"`
 	Route          string                  `json:"route"`
-	Interval       int                     `json:"interval"`
+	Interval       float32                 `json:"interval"`
 	RateLimit      int                     `json:"rate_limit"`
 	LastUpdated    float64                 `json:"last_updated"`
 	IsActive       bool                    `json:"is_active"`
