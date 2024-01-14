@@ -67,9 +67,9 @@ func rateLimiteMiddleware(apikey string, config Config, endpoints []string, log_
 		}
 
 		// Convert lastLogSent to int64
-		var lastLogSent int
+		var lastLogSent float64
 		if lastLogSentRaw != nil {
-			lastLogSent, _ = lastLogSentRaw.(int)
+			lastLogSent, _ = lastLogSentRaw.(float64)
 		}
 
 		if lastLogSent == 0 || timestamp-lastLogSent > 10000 {
