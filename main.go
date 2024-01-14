@@ -136,6 +136,6 @@ func SyncProject(endpoints []string) {
 
 	for _, route := range endpoints {
 		editedRoute := strings.ReplaceAll(route, "/", "~")
-		log_dict[editedRoute] = nil
+		log_dict[editedRoute] = 0.0
 	}
 }
