@@ -15,7 +15,7 @@ type RateLimiter struct {
 	Route          string                  `json:"route"`
 	Interval       int                     `json:"interval"`
 	RateLimit      int                     `json:"rate_limit"`
-	LastUpdated    int                     `json:"last_updated"`
+	LastUpdated    float64                 `json:"last_updated"`
 	IsActive       bool                    `json:"is_active"`
 	UniqueID       string                  `json:"unique_id"`
 	ErrorPayloadID string                  `json:"error_payload_id"`
@@ -25,10 +25,10 @@ type RateLimiter struct {
 
 type Config struct {
 	BaseURL            string                 `json:"base_url"`
-	CreatedAt          int                    `json:"created_at"`
+	CreatedAt          float64                `json:"created_at"`
 	Encryption         Encryption             `json:"encryption"`
 	EncryptionEnabled  bool                   `json:"encryption_enabled"`
-	LastUpdated        int                    `json:"last_updated"`
+	LastUpdated        float64                `json:"last_updated"`
 	RateLimiter        map[string]RateLimiter `json:"rate_limiter"`
 	RateLimiterEnabled bool                   `json:"rate_limiter_enabled"`
 	UserId             string                 `json:"user_id"`
