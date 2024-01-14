@@ -133,6 +133,7 @@ func SyncProjectRoutes(endpoints []string) (result map[string]interface{}, err e
 }
 
 func SyncProject(endpoints []string) {
+	log_dict = make(map[string]interface{})
 	SyncProjectRoutes(endpoints)
 
 	for _, route := range endpoints {
